@@ -24,7 +24,8 @@ class DownloadService:
         season: int = None, 
         episode: int = None, 
         concurrent_downloads: int = 1,
-        best_video: bool = False
+        best_video: bool = False,
+        include_title_dir: bool = True
     ):
         # Verifica che la directory di output esista, altrimenti la crea
         if not os.path.exists(output_dir):
@@ -55,12 +56,14 @@ class DownloadService:
 
         async def download_with_semaphore(stream_url: StreamUrl):
             async with semaphore:
-                await self.download_stream(stream_url, output_dir, best_video)
+                await self.download_stream(stream_url, output_dir, best_video, include_title_dir)
 
         await asyncio.gather(*[download_with_semaphore(url) for url in download_urls])
 
-    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool):
-        output_path = os.path.join(output_dir, stream_url.title)
+    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool, include_title_dir: bool):
+        output_path = output_dir
+        if include_title_dir:
+            output_path = os.path.join(output_path, stream_url.title)
         if stream_url.season_number is not None and stream_url.episode_number is not None:
             output_path = os.path.join(output_path, f"Season {stream_url.season_number}")
             output_path = os.path.join(output_path, f"{stream_url.title} - S{stream_url.season_number:02}E{stream_url.episode_number:02}.%(ext)s")

@@ -12,7 +12,8 @@ from streamingcommunitydownloader.service.DownloadService import DownloadService
 @click.option('--episode', default=None, help='Episode number (optional).')
 @click.option('--concurrent-downloads', default=1, type=int, help='Number of concurrent downloads.')
 @click.option('--best-video', is_flag=True, default=False, help='Download the best video quality available.')
-def download_command(url, output_dir, season, episode, concurrent_downloads, best_video):
+@click.option('--include-title-dir', is_flag=True, default=True, help='Include the title directory in the output path.')
+def download_command(url, output_dir, season, episode, concurrent_downloads, best_video, include_title_dir):
     default_container: DefaultContainer = DefaultContainer.getInstance()
     download_service: DownloadService = default_container.get(DownloadService)
 
@@ -23,7 +24,8 @@ def download_command(url, output_dir, season, episode, concurrent_downloads, bes
             season=int(season) if season else None,
             episode=int(episode) if episode else None,
             concurrent_downloads=concurrent_downloads,
-            best_video=best_video
+            best_video=best_video,
+            include_title_dir=include_title_dir
         )
     )
     click.echo('Download process completed successfully!')
