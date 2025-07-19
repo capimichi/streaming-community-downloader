@@ -23,7 +23,8 @@ class DownloadService:
         output_dir: str, 
         season: int = None, 
         episode: int = None, 
-        concurrent_downloads: int = 1
+        concurrent_downloads: int = 1,
+        best_video: bool = False
     ):
         # Verifica che la directory di output esista, altrimenti la crea
         if not os.path.exists(output_dir):
@@ -54,11 +55,11 @@ class DownloadService:
 
         async def download_with_semaphore(stream_url: StreamUrl):
             async with semaphore:
-                await self.download_stream(stream_url, output_dir)
+                await self.download_stream(stream_url, output_dir, best_video)
 
         await asyncio.gather(*[download_with_semaphore(url) for url in download_urls])
 
-    async def download_stream(self, stream_url: StreamUrl, output_dir: str):
+    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool):
         output_path = os.path.join(output_dir, stream_url.title)
         if stream_url.season_number is not None and stream_url.episode_number is not None:
             output_path = os.path.join(output_path, f"Season {stream_url.season_number}")
@@ -93,7 +94,10 @@ class DownloadService:
         format_audio = []
         for format_item in m3u_data.formats or []:
             if format_item.height:
-                if not format_video or (format_item.height < format_video.height):
+                if not format_video or (
+                    (best_video and format_item.height > format_video.height) or 
+                    (not best_video and format_item.height < format_video.height)
+                ):
                     format_video = format_item
         
             if not format_item.height:
