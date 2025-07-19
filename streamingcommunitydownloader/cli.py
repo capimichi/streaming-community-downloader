@@ -8,5 +8,8 @@ def cli():
 
 cli.add_command(download_command)
 
-if __name__ == '__main__':
+def main():
     cli()
+
+if __name__ == '__main__':
+    main()
