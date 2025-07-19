@@ -1,3 +1,4 @@
+import shlex
 from typing import List
 from injector import inject
 import os
@@ -5,6 +6,7 @@ import asyncio
 import subprocess
 
 from streamingcommunitydownloader.client.StreamingCommunityClient import StreamingCommunityClient
+from streamingcommunitydownloader.model.M3uData.M3uData import M3uData
 from streamingcommunitydownloader.model.StreamUrl import StreamUrl
 
 
@@ -81,14 +83,40 @@ class DownloadService:
         command = ["yt-dlp", "-j", stream_url.url]
         try:
             result = subprocess.run(command, capture_output=True, text=True, check=True)
+            m3u_data = M3uData.model_validate_json(result.stdout)
             print(f"Metadata for {stream_url.url}: {result.stdout}")
         except subprocess.CalledProcessError as e:
             print(f"Error getting metadata for {stream_url.url}: {e}")
             return
         
+        format_video = None
+        format_audio = []
+        for format_item in m3u_data.formats or []:
+            if format_item.height:
+                if not format_video or (format_item.height < format_video.height):
+                    format_video = format_item
+        
+            if not format_item.height:
+                format_audio.append(format_item)
+
+        # Sort format_audio: "it" language first, others after
+        format_audio.sort(key=lambda x: 0 if getattr(x, 'language', None) in ["it", "ita"] else 1)
+        
+        format_str = format_video.format_id if format_video else ""
+
+        for format_item in format_audio:
+            format_str += f"+{format_item.format_id}" if format_item else ""
+    
 
         # Use yt-dlp to download the stream
-        command = ["yt-dlp", "-o", output_path, stream_url.url]
+        command = [
+            "yt-dlp", 
+            "-f", format_str, 
+            "--audio-multistreams",
+            "--merge-output-format", "mkv",
+            "-o", output_path, 
+            stream_url.url
+        ]
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as e:

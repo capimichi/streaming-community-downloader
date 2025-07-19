@@ -1,0 +1,54 @@
+from typing import List, Optional, Dict
+from pydantic import BaseModel
+from .Format import Format
+
+class M3uData(BaseModel):
+    id: Optional[str] = None
+    title: Optional[str] = None
+    timestamp: Optional[float] = None
+    formats: Optional[List[Format]] = None
+    subtitles: Optional[Dict] = None
+    http_headers: Optional[Dict] = None
+    hls_aes: Optional[str] = None
+    duration: Optional[int] = None
+    webpage_url: Optional[str] = None
+    original_url: Optional[str] = None
+    webpage_url_basename: Optional[str] = None
+    webpage_url_domain: Optional[str] = None
+    extractor: Optional[str] = None
+    extractor_key: Optional[str] = None
+    playlist: Optional[str] = None
+    playlist_index: Optional[int] = None
+    display_id: Optional[str] = None
+    fulltitle: Optional[str] = None
+    duration_string: Optional[str] = None
+    upload_date: Optional[str] = None
+    release_year: Optional[int] = None
+    requested_subtitles: Optional[Dict] = None
+    _has_drm: Optional[bool] = None
+    epoch: Optional[float] = None
+    requested_formats: Optional[List[Format]] = None
+    format_id: Optional[str] = None
+    ext: Optional[str] = None
+    protocol: Optional[str] = None
+    language: Optional[str] = None
+    format_note: Optional[str] = None
+    filesize_approx: Optional[int] = None
+    tbr: Optional[float] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    resolution: Optional[str] = None
+    fps: Optional[float] = None
+    dynamic_range: Optional[str] = None
+    vcodec: Optional[str] = None
+    vbr: Optional[float] = None
+    stretched_ratio: Optional[float] = None
+    aspect_ratio: Optional[float] = None
+    acodec: Optional[str] = None
+    abr: Optional[float] = None
+    asr: Optional[int] = None
+    audio_channels: Optional[int] = None
+    _filename: Optional[str] = None
+    filename: Optional[str] = None
+    _type: Optional[str] = None
+    _version: Optional[Dict] = None
