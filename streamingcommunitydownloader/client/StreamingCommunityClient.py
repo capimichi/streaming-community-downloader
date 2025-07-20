@@ -28,7 +28,7 @@ class StreamingCommunityClient:
 
         async with async_playwright() as p:
             browser = await p.webkit.launch(
-                headless=False,  # Run in headless mode for better performance
+                headless=True,  # Run in headless mode for better performance
             )
             page = await browser.new_page()
             await page.goto(url)
