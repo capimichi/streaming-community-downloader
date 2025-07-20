@@ -36,7 +36,7 @@ class StreamingCommunityClient:
         episode_urls = []
 
         async with async_playwright() as p:
-            browser_args = {"headless": True}
+            browser_args = {"headless": False}
             if self.proxy:
                 browser_args['proxy'] = {"server": self.proxy}
             browser = await p.webkit.launch(**browser_args)
@@ -98,11 +98,19 @@ class StreamingCommunityClient:
 
         for season_number in range(1, seasion_count + 1):
 
+            if (selected_season_number is not None 
+                and season_number != selected_season_number):
+                continue
+
             season_url = f"{base_url}/season-{season_number}"
 
             episode_number = 0
             while True:
                 episode_number += 1
+
+                if (selected_episode_number is not None 
+                    and episode_number != selected_episode_number):
+                    continue
                 
                 await page.goto(season_url)
                 await page.wait_for_timeout(3000)  # Wait for the page to load completely
