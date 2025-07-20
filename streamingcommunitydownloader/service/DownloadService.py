@@ -30,7 +30,8 @@ class DownloadService:
         concurrent_downloads: int = 1,
         best_video: bool = False,
         exclude_title_dir: bool = False,
-        proxy: str = None
+        proxy: str = None,
+        include_all_audio_streams: bool = False
     ):
         # Set proxy in client if provided
         if proxy:
@@ -65,11 +66,11 @@ class DownloadService:
 
         async def download_with_semaphore(stream_url: StreamUrl):
             async with semaphore:
-                await self.download_stream(stream_url, output_dir, best_video, exclude_title_dir, proxy)
+                await self.download_stream(stream_url, output_dir, best_video, exclude_title_dir, proxy, include_all_audio_streams)
 
         await asyncio.gather(*[download_with_semaphore(url) for url in download_urls])
 
-    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool, exclude_title_dir: bool, proxy: str = None):
+    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool, exclude_title_dir: bool, proxy: str = None, include_all_audio_streams: bool = False):
         output_path = output_dir
         if not exclude_title_dir:
             output_path = os.path.join(output_path, stream_url.title)
@@ -102,7 +103,6 @@ class DownloadService:
             notify_type="info"
         )
 
-
         # first get j
         command = ["yt-dlp", "-j"]
         if proxy:
@@ -128,6 +128,10 @@ class DownloadService:
         
             if not format_item.height:
                 format_audio.append(format_item)
+
+        if not include_all_audio_streams:
+            # Filter audio streams to include only "it" or "ita"
+            format_audio = [item for item in format_audio if getattr(item, 'language', None) in ["it", "ita"]]
 
         # Sort format_audio: "it" language first, others after
         format_audio.sort(key=lambda x: 0 if getattr(x, 'language', None) in ["it", "ita"] else 1)
