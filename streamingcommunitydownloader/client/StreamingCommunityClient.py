@@ -8,13 +8,22 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 class StreamingCommunityClient:
 
+    proxy: str = None
+
     @inject
     def __init__(self):
         pass        
 
+
+    async def set_proxy(self, proxy: str):
+        self.proxy = proxy
+
     async def is_movie(self, url: str) -> bool:
         async with async_playwright() as p:
-            browser = await p.webkit.launch()
+            browser_args = {}
+            if self.proxy:
+                browser_args['proxy'] = {"server": self.proxy}
+            browser = await p.webkit.launch(**browser_args)
             page = await browser.new_page()
             await page.goto(url)
             is_movie = await page.evaluate(
@@ -27,9 +36,10 @@ class StreamingCommunityClient:
         episode_urls = []
 
         async with async_playwright() as p:
-            browser = await p.webkit.launch(
-                headless=True,  # Run in headless mode for better performance
-            )
+            browser_args = {"headless": True}
+            if self.proxy:
+                browser_args['proxy'] = {"server": self.proxy}
+            browser = await p.webkit.launch(**browser_args)
             page = await browser.new_page()
             await page.goto(url)
             await page.wait_for_timeout(3000)  # Wait for the page to load completely

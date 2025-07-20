@@ -25,8 +25,13 @@ class DownloadService:
         episode: int = None, 
         concurrent_downloads: int = 1,
         best_video: bool = False,
-        exclude_title_dir: bool = False
+        exclude_title_dir: bool = False,
+        proxy: str = None
     ):
+        # Set proxy in client if provided
+        if proxy:
+            await self.streaming_community_client.set_proxy(proxy)
+
         # Verifica che la directory di output esista, altrimenti la crea
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -56,11 +61,11 @@ class DownloadService:
 
         async def download_with_semaphore(stream_url: StreamUrl):
             async with semaphore:
-                await self.download_stream(stream_url, output_dir, best_video, exclude_title_dir)
+                await self.download_stream(stream_url, output_dir, best_video, exclude_title_dir, proxy)
 
         await asyncio.gather(*[download_with_semaphore(url) for url in download_urls])
 
-    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool, exclude_title_dir: bool):
+    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool, exclude_title_dir: bool, proxy: str = None):
         output_path = output_dir
         if not exclude_title_dir:
             output_path = os.path.join(output_path, stream_url.title)
@@ -83,8 +88,11 @@ class DownloadService:
 
         print(f"Downloading {stream_url.url} to {output_path}")
 
-        # first get j
-        command = ["yt-dlp", "-j", stream_url.url]
+        # first get j
+        command = ["yt-dlp", "-j"]
+        if proxy:
+            command.extend(["--proxy", proxy])
+        command.append(stream_url.url)
         try:
             result = subprocess.run(command, capture_output=True, text=True, check=True)
             m3u_data = M3uData.model_validate_json(result.stdout)
@@ -121,9 +129,11 @@ class DownloadService:
             "-f", format_str, 
             "--audio-multistreams",
             "--merge-output-format", "mkv",
-            "-o", output_path, 
-            stream_url.url
+            "-o", output_path
         ]
+        if proxy:
+            command.extend(["--proxy", proxy])
+        command.append(stream_url.url)
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as e:
