@@ -4,6 +4,7 @@ from injector import inject
 import os
 import asyncio
 import subprocess
+from apprise import Apprise
 
 from streamingcommunitydownloader.client.StreamingCommunityClient import StreamingCommunityClient
 from streamingcommunitydownloader.model.M3uData.M3uData import M3uData
@@ -14,8 +15,11 @@ class DownloadService:
 
     @inject
     def __init__(self, 
-                 streaming_community_client: StreamingCommunityClient):
+                 streaming_community_client: StreamingCommunityClient,
+                 apprise: Apprise
+                 ):
         self.streaming_community_client = streaming_community_client
+        self.apprise = apprise
 
     async def download(
         self, 
@@ -88,6 +92,17 @@ class DownloadService:
 
         print(f"Downloading {stream_url.url} to {output_path}")
 
+        apprise_message = f"Download started: {stream_url.title}"
+        if stream_url.season_number is not None and stream_url.episode_number is not None:
+            apprise_message += f" - S{stream_url.season_number:02}:E{stream_url.episode_number:02}"
+
+
+        self.apprise.notify(
+            body=apprise_message,
+            notify_type="info"
+        )
+
+
         # first get j
         command = ["yt-dlp", "-j"]
         if proxy:
@@ -136,11 +151,17 @@ class DownloadService:
         command.append(stream_url.url)
         try:
             subprocess.run(command, check=True)
+            apprise_message = apprise_message.replace("Download started", "Download completed")
+            self.apprise.notify(
+                body=apprise_message,
+                notify_type="success"
+            )
         except subprocess.CalledProcessError as e:
             print(f"Error downloading {stream_url.url}: {e}")
-
-
-
-
+            apprise_message = apprise_message.replace("Download started", "Download failed")
+            self.apprise.notify(
+                body=apprise_message,
+                notify_type="error"
+            )
 
 

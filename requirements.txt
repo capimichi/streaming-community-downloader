@@ -1,17 +1,23 @@
 annotated-types==0.7.0
 appdirs==1.4.4
+apprise==1.9.3
 asttokens==2.4.1
 asyncio==3.4.3
 baron==0.10.1
 cbor2==5.6.5
+certifi==2025.7.14
+charset-normalizer==3.4.2
 click==8.1.7
 distconfig3==1.0.1
 greenlet==3.2.3
+idna==3.10
 importlib_metadata==8.5.0
 inflection==0.5.1
 injector==0.22.0
 Jinja2==3.1.4
+Markdown==3.8.2
 MarkupSafe==3.0.2
+oauthlib==3.3.1
 packaging==23.2
 pir @ git+https://github.com/capimichi/pir@116de10a583439e7973ea64da52b0b05d9257a5c
 playwright==1.53.0
@@ -22,11 +28,14 @@ pyee==13.0.0
 python-dotenv==1.0.1
 PyYAML==6.0.2
 redbaron @ git+https://github.com/PyCQA/redbaron@9b4a1825d160269815ca7bc90f55fff8a5e76e29
+requests==2.32.4
+requests-oauthlib==2.0.0
 rply==0.7.8
 six==1.16.0
 toml==0.10.2
 typing-inspection==0.4.1
 typing_extensions==4.14.1
+urllib3==2.5.0
 vyper-config @ git+https://github.com/alexferl/vyper@a0a6ea7f84544e598dd326a5fe8389346f59c64d
 watchdog==6.0.0
 zipp==3.21.0

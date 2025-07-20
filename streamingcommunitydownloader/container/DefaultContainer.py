@@ -5,6 +5,8 @@ import os
 from injector import Injector
 from dotenv import load_dotenv
 
+from apprise import Apprise
+
 
 class DefaultContainer:
     injector = None
@@ -41,12 +43,14 @@ class DefaultContainer:
         # self.app_log_path = os.path.join(self.log_dir, 'app.log')
 
     def _init_environment_variables(self):
-        self.pandoc_executable = os.environ.get('PANDOC_EXECUTABLE', 'pandoc')
+        self.apprise_streams = json.loads(os.environ.get('STREAMING_COMMUNITY_DOWNLOADER_APPRISE_STREAMS', '[]'))
 
     def _init_logging(self):
         # logging.basicConfig(filename=self.app_log_path, level=logging.INFO, filemode='a', format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S')
         pass
 
     def _init_bindings(self):
-        # self.injector.binder.bind(PostDirVariable, PostDirVariable(self.post_dir))
-        pass
+        apprise = Apprise()
+        for stream in self.apprise_streams:
+            apprise.add(stream)
+        self.injector.binder.bind(Apprise, apprise)
