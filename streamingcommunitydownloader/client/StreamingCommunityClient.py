@@ -36,7 +36,7 @@ class StreamingCommunityClient:
         episode_urls = []
 
         async with async_playwright() as p:
-            browser_args = {"headless": False}
+            browser_args = {"headless": True}
             if self.proxy:
                 browser_args['proxy'] = {"server": self.proxy}
             browser = await p.webkit.launch(**browser_args)
