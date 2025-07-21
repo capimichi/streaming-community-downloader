@@ -48,6 +48,8 @@ class StreamingCommunityClient:
                 title = await page.text_content("h1.title")
             elif await page.evaluate("document.querySelector('.logo-image')") is not None:
                 title = await page.get_attribute(".logo-image", "alt")
+            elif await page.evaluate("document.querySelector('.title h1 span')") is not None:
+                title = await page.text_content("h1.title span")
             
             if await page.evaluate("document.querySelector('.buttons a.play2')") is not None:
                 episode_urls = await self._fetch_episode_urls_with_tt_season(
