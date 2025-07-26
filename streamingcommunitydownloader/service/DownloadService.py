@@ -31,7 +31,9 @@ class DownloadService:
         best_video: bool = False,
         exclude_title_dir: bool = False,
         proxy: str = None,
-        include_all_audio_streams: bool = False
+        include_all_audio_streams: bool = False,
+        dry_run: bool = False,
+        dryrun_callback = None
     ):
         # Set proxy in client if provided
         if proxy:
@@ -66,11 +68,11 @@ class DownloadService:
 
         async def download_with_semaphore(stream_url: StreamUrl):
             async with semaphore:
-                await self.download_stream(stream_url, output_dir, best_video, exclude_title_dir, proxy, include_all_audio_streams)
+                await self.download_stream(stream_url, output_dir, best_video, exclude_title_dir, proxy, include_all_audio_streams, dry_run, dryrun_callback)
 
         await asyncio.gather(*[download_with_semaphore(url) for url in download_urls])
 
-    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool, exclude_title_dir: bool, proxy: str = None, include_all_audio_streams: bool = False):
+    async def download_stream(self, stream_url: StreamUrl, output_dir: str, best_video: bool, exclude_title_dir: bool, proxy: str = None, include_all_audio_streams: bool = False, dry_run: bool = False, dryrun_callback = None):
         output_path = output_dir
         if not exclude_title_dir:
             output_path = os.path.join(output_path, stream_url.title)
@@ -153,6 +155,12 @@ class DownloadService:
         if proxy:
             command.extend(["--proxy", proxy])
         command.append(stream_url.url)
+        
+        if dry_run and dryrun_callback:
+            command_str = " ".join(shlex.quote(arg) for arg in command)
+            dryrun_callback(command_str)
+            return
+        
         try:
             subprocess.run(command, check=True)
             apprise_message = apprise_message.replace("Download started", "Download completed")

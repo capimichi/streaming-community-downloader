@@ -15,7 +15,11 @@ from streamingcommunitydownloader.service.DownloadService import DownloadService
 @click.option('--exclude-title-dir', is_flag=True, default=False, help='Exclude the title directory from the output path. Default is False. Use this flag to skip creating a title directory. Example: --exclude-title-dir')
 @click.option('--proxy', default=None, help='Proxy server to use. Format: protocol://user:pass@host:port. Example: --proxy http://127.0.0.1:8080')
 @click.option('--include-all-audio-streams', is_flag=True, default=False, help='Include all audio streams regardless of language. Default is False. Use this flag to include all audio streams. Example: --include-all-audio-streams')
-def download_command(url, output_dir, season, episode, concurrent_downloads, best_video, exclude_title_dir, proxy, include_all_audio_streams):
+@click.option('--dry-run', is_flag=True, default=False, help='Print commands that would be executed without actually running them. Default is False. Example: --dry-run')
+def download_command(url, output_dir, season, episode, concurrent_downloads, best_video, exclude_title_dir, proxy, include_all_audio_streams, dry_run):
+    def dryrun_callback(message):
+        click.echo(message)
+
     default_container: DefaultContainer = DefaultContainer.getInstance()
     download_service: DownloadService = default_container.get(DownloadService)
 
@@ -29,7 +33,9 @@ def download_command(url, output_dir, season, episode, concurrent_downloads, bes
             best_video=best_video,
             exclude_title_dir=exclude_title_dir,
             proxy=proxy,
-            include_all_audio_streams=include_all_audio_streams
+            include_all_audio_streams=include_all_audio_streams,
+            dry_run=dry_run,
+            dryrun_callback=dryrun_callback
         )
     )
     click.echo('Download process completed successfully!')
