@@ -61,7 +61,7 @@ class DownloadService:
         else:
             pass # Handle movie case if needed
 
-        print(f"Found {len(download_urls)} streams to download.")
+        # print(f"Found {len(download_urls)} streams to download.")
 
         # Ora scarico i file
         semaphore = asyncio.Semaphore(concurrent_downloads)
@@ -90,10 +90,10 @@ class DownloadService:
         for ext in extensions_test:
             test_path = output_path.replace('%(ext)s', ext)
             if os.path.exists(test_path):
-                print(f"File already exists: {test_path}")
+                # print(f"File already exists: {test_path}")
                 return
 
-        print(f"Downloading {stream_url.url} to {output_path}")
+        # print(f"Downloading {stream_url.url} to {output_path}")
 
         apprise_message = f"Download started: {stream_url.title}"
         if stream_url.season_number is not None and stream_url.episode_number is not None:
@@ -113,7 +113,7 @@ class DownloadService:
         try:
             result = subprocess.run(command, capture_output=True, text=True, check=True)
             m3u_data = M3uData.model_validate_json(result.stdout)
-            print(f"Metadata for {stream_url.url}: {result.stdout}")
+            # print(f"Metadata for {stream_url.url}: {result.stdout}")
         except subprocess.CalledProcessError as e:
             print(f"Error getting metadata for {stream_url.url}: {e}")
             return
